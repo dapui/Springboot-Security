@@ -5,14 +5,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity  // 스프링 시큐리티 필터(SecurityConfig)가 스프링 필터체인에 등록이 됨
 public class SecurityConfig {
 
+    // 보안 설정 구성
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
@@ -22,7 +24,13 @@ public class SecurityConfig {
                 .anyRequest().permitAll() // 그리고 나머지 url은 전부 권한을 허용
             )
             .formLogin(form -> form
-                .loginPage("/login")); // 기본 로그인 폼 활성화
+                .loginPage("/loginForm")); // 기본 로그인 폼 활성화
         return http.build();
+    }
+
+    // 해당 메서드의 리턴되는 오브젝트를 IoC로 등록
+    @Bean
+    public BCryptPasswordEncoder encodePwd() {
+        return new BCryptPasswordEncoder();
     }
 }

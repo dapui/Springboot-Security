@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration
+@Configuration // SecurityConfig 클래스가 bean 메서드를 가지고 있음을 명시
 @EnableWebSecurity  // 스프링 시큐리티 필터(SecurityConfig)가 스프링 필터체인에 등록이 됨
 public class SecurityConfig {
 
@@ -24,7 +24,9 @@ public class SecurityConfig {
                 .anyRequest().permitAll() // 그리고 나머지 url은 전부 권한을 허용
             )
             .formLogin(form -> form
-                .loginPage("/loginForm")); // 기본 로그인 폼 활성화
+                .loginPage("/loginForm") // 기본 로그인 폼 활성화
+                .loginProcessingUrl("/login") // login 주소가 호출되면 시큐리티가 낚아채서 대신 로그인을 진행
+                .defaultSuccessUrl("/")); // 로그인 완료시 이동되는 페이지
         return http.build();
     }
 

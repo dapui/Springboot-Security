@@ -32,5 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 
+<<<<<<< HEAD
 ### security ###
+=======
+### Security ###
+>>>>>>> f62972d (구글 로그인 및 자동 회원가입 진행 완료)
 ../.env

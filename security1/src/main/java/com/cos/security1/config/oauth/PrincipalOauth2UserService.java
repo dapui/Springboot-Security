@@ -3,6 +3,7 @@ package com.cos.security1.config.oauth;
 import com.cos.security1.config.auth.PrincipalDetails;
 import com.cos.security1.config.oauth.provider.FacebookUserInfo;
 import com.cos.security1.config.oauth.provider.GoogleUserInfo;
+import com.cos.security1.config.oauth.provider.NaverUserInfo;
 import com.cos.security1.config.oauth.provider.OAuth2UserInfo;
 import com.cos.security1.model.User;
 import com.cos.security1.repository.UserRepository;
@@ -48,6 +49,10 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
             case "facebook":
                 System.out.println("페이스북 로그인 요청");
                 oAuth2UserInfo = new FacebookUserInfo(oAuth2User.getAttributes());
+                break;
+            case "naver":
+                System.out.println("네이버 로그인 요청");
+                oAuth2UserInfo = new NaverUserInfo((Map)oAuth2User.getAttributes().get("response"));
                 break;
             default:
                 System.out.println("우리는 구글, 페이스북, 네이버만 지원합니다.");

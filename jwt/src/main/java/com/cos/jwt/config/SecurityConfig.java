@@ -1,7 +1,8 @@
 package com.cos.jwt.config;
 
 import com.cos.jwt.config.jwt.JwtAuthenticationFilter;
-import com.cos.jwt.filter.MyFilter3;
+import com.cos.jwt.config.jwt.JwtAuthorizationFilter;
+import com.cos.jwt.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 
 @Configuration
 @EnableWebSecurity // 시큐리티 활성화 -> 기본 스프링 필터체인에 등록
@@ -21,6 +21,7 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 public class SecurityConfig {
 
     private final CorsConfig corsConfig;
+    private final UserRepository userRepository;
 
     @Bean // authenticationManager를 IoC에 등록해줌.
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -35,8 +36,9 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .addFilter(corsConfig.corsFilter()) // 인증이 필요 없을 경우에는 컨트롤러에 @CrossOrigin, 인증이 필요한 경우에는 시큐리티 필터에 등록 --> 모든 요청 허용
-            //.addFilterBefore(new MyFilter3(), SecurityContextPersistenceFilter.class) // 커스텀 필터 추가 ---> 22, 23강 테스트용.
-            .addFilter(new JwtAuthenticationFilter(authenticationManager)) // AuthenticationManager ---> 24강 테스트
+            //.addFilterBefore(new MyFilter3(), SecurityContextPersistenceFilter.class) // 커스텀 필터 추가 ---> 테스트용.
+            .addFilter(new JwtAuthenticationFilter(authenticationManager))
+            .addFilter(new JwtAuthorizationFilter(authenticationManager, userRepository))
             .formLogin(form -> form.disable()) // form 로그인 비활성화
             .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic 인증 비활성화
             .authorizeHttpRequests(authorize -> authorize

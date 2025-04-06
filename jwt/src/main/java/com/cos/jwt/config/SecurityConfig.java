@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 
@@ -29,14 +30,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
         http
-            .addFilterBefore(new MyFilter3(), SecurityContextPersistenceFilter.class) // 커스텀 필터 추가
             .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
             .sessionManagement(session -> session // session을 사용하지 않겠다 -> stateless 서버로 만든다
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+            .addFilter(corsConfig.corsFilter()) // 인증이 필요 없을 경우에는 컨트롤러에 @CrossOrigin, 인증이 필요한 경우에는 시큐리티 필터에 등록 --> 모든 요청 허용
+            //.addFilterBefore(new MyFilter3(), SecurityContextPersistenceFilter.class) // 커스텀 필터 추가 ---> 22, 23강 테스트용.
+            .addFilter(new JwtAuthenticationFilter(authenticationManager)) // AuthenticationManager ---> 24강 테스트
             .formLogin(form -> form.disable()) // form 로그인 비활성화
-            .addFilter(corsConfig.corsFilter()) // 인증이 필요 없을 경우에는 컨트롤러에 @CrossOrigin, 인증이 필요한 경우에는 시큐리티 필터에 등록
-            .addFilter(new JwtAuthenticationFilter(authenticationManager))
             .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic 인증 비활성화
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "MANAGER", "ADMIN") // USER, MANAGER, ADMIN 인증이 필요
@@ -46,6 +47,11 @@ public class SecurityConfig {
             );
 
         return http.build();
+    }
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }
